@@ -1,75 +1,76 @@
 #include "zmqwrap.h"
+#include <stdio.h>
 
 // Continuation flag
-int keepLooping = 1;
+int rtbLoopFlag = 1;
 
 /*!
- * \fn void signalHandler(int signal_value)
- * Changes the keepLooping flag to 0 in the event of a keyboard interrupt.
+ * \fn void rtb_signalHandler(int signal_value)
+ * Changes the rtbLoopFlag flag to 0 in the event of a keyboard interrupt.
  * 
  * \param signal_value
  * \return Returns void.
 */
-void signalHandler(int signal_value)
+void rtb_signalHandler(int signal_value)
 {
-    keepLooping = 0;
+    rtbLoopFlag = 0;
 }
 
 /*!
- * \fn int isLooping()
- * Returns the value of the keepLooping flag.
+ * \fn int rtb_isLooping()
+ * Returns the value of the rtbLoopFlag flag.
  * 
- * \return Returns the value of the keepLooping flag, which is 1 for continue and 0 for stop.
+ * \return Returns the value of the rtbLoopFlag flag, which is 1 for continue and 0 for stop.
 */
-int isLooping()
+int rtb_isLooping()
 {
-    return keepLooping;
+    return rtbLoopFlag;
 }
 
 /*!
- * \fn void* bindpub(void* context, char* socket)
+ * \fn void* rtb_initPub(void* context, char* socket)
  * Binds the publisher socket.
  * 
  * \param context The ZMQ context in which the publisher socket will do work.
  * \param socket The ZMQ socket which we will use as our publisher to send out messages.
  * \return Returns a pointer to the publisher socket that we set up.
 */
-void* bindpub(void* context, char* socket)
+void* rtb_initPub(void* context, char* socket)
 {
     void* publisher = zmq_socket(context, ZMQ_PUB);
     int rc = zmq_bind(publisher, socket);
     assert(rc == 0);
-    printf("Publisher connected\n");
+    printf("Publisher (0x%p) initialized and online.\n", context);
     return publisher;
 }
 
 /*!
- * \fn void* connectsub(void* context, char* socket)
+ * \fn void* rtb_connectSub(void* context, char* socket)
  * Connects the subscriber socket.
  * 
  * \param context The ZMQ context in which the subscriber socket will do work.
  * \param socket The ZMQ socket which we will use as our subscriber to receive messages.
  * \return Returns a pointer to the subscriber socket that we set up.
 */
-void* connectsub(void* context, char* socket)
+void* rtb_connectSub(void* context, char* socket)
 {
     void* subscriber = zmq_socket(context, ZMQ_SUB);
     int rc = zmq_connect(subscriber, socket);
     const char* filter = "";
     rc = zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, filter, strlen(filter));
-    printf("Subscriber connected, waiting for other publisher\n");
+    printf("Subscriber (0x%p) connected to and waiting for publisher (%s).\n", context, socket);
     return subscriber;
 }
 
 /*!
- * \fn void pubmsg(void* pub, float values[3]) 
+ * \fn void rtb_publishMsg(void* pub, float values[3]) 
  * Publishes a message
  * 
  * \param pub A pointer to the publisher socket.
  * \param values An array of 3 float values that will be formatted into a message and sent out.
  * \return Returns void.
 */
-void pubmsg(void* pub, float values[3]) 
+void rtb_publishMsg(void* pub, float values[3]) 
 {
     messagefloat currmsg;
     currmsg.x = values[0];
@@ -84,13 +85,13 @@ void pubmsg(void* pub, float values[3])
 }
  
 /*!
- * \fn void submsg(void* sub) 
+ * \fn void rtb_receiveMsg(void* sub) 
  * Subscribes and prints a received message.
  * 
  * \param sub A pointer to the subscriber socket.
  * \return Returns void.
 */
-void submsg(void* sub) 
+void rtb_receiveMsg(void* sub) 
 {
     zmq_msg_t recv_msg;
     zmq_msg_init(&recv_msg);
@@ -104,7 +105,7 @@ void submsg(void* sub)
 }
 
 /*!
- * \fn void cleanup(void* pub, void* sub, void* context)
+ * \fn void rtb_cleanup(void* pub, void* sub, void* context)
  * Neatly closes the sockets and the context at the end of our main() function.
  * 
  * \param pub A pointer to the publisher socket.
@@ -112,7 +113,7 @@ void submsg(void* sub)
  * \param context A pointer to the ZMQ context.
  * \return Returns void.
 */
-void cleanup(void* pub, void* sub, void* context)
+void rtb_cleanup(void* pub, void* sub, void* context)
 {
     printf("\nClosing the program\n");
     zmq_close(pub);
@@ -121,18 +122,18 @@ void cleanup(void* pub, void* sub, void* context)
 }
 
 /*!
- * \fn void startmsg(void* pub, int* keepLooping)
+ * \fn void startmsg(void* pub, int* rtbLoopFlag)
  * Old main function used for starting the messaging.
  * 
  * \param pub A pointer to the publisher socket.
- * \param keepLooping A pointer to the continuation flag.
+ * \param rtbLoopFlag A pointer to the continuation flag.
  * \return Returns void.
 */
-void startmsg(void* pub, int* keepLooping)
+void startmsg(void* pub, int* rtbLoopFlag)
 {
     signal(SIGINT, signalHandler);
     unsigned long long i = 0;
-    while (*keepLooping)
+    while (*rtbLoopFlag)
     {
         // Send message
         message currmsg;

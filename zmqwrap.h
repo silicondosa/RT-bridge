@@ -37,31 +37,31 @@ extern "C" {
     } messagefloat;
 
     // A flag that indicates whether to continue the code or not.
-    extern int keepLooping;
+    extern int rtbLoopFlag;
 
     // Updates the continuation flag in the event of an interrupt.
-    void signalHandler(int signal_value);
+    void rtb_signalHandler(int signal_value);
 
     // Checks the continuation flag value.
-    int isLooping();
+    int rtb_isLooping();
 
     // Binds the publisher socket.
-    void* bindpub(void* context, char* socket);
+    void* rtb_initPub(void* context, char* socket);
 
     // Connects the subscriber socket.
-    void* connectsub(void* context, char* socket);
+    void* rtb_connectSub(void* context, char* socket);
+
+    // Publishes the message to the publisher socket.
+    void rtb_publishMsg(void* pub, float values[3]);
+
+    // Reads from the subscriber socket and prints the received message.
+    void rtb_receiveMsg(void* sub);
+
+    // Neatly closes the sockets and context at the end.
+    void rtb_cleanup(void* pub, void* sub, void* context);
 
     // Old function used to start the messaging in one command.
     void startmsg(void* pub, int* keepLooping);
-
-    // Publishes the message to the publisher socket.
-    void pubmsg(void* pub, float values[3]);
-
-    // Reads from the subscriber socket and prints the received message.
-    void submsg(void* sub);
-
-    // Neatly closes the sockets and context at the end.
-    void cleanup(void* pub, void* sub, void* context);
 
 #ifdef __cplusplus 
 }

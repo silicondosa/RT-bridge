@@ -1,3 +1,7 @@
+# RT-Bridge
+RT-Bridge is a nearly-realtime message-passing framework built on top of the publisher-subscriber model using ZeroMQ.
+It has been developed with ease of deployment and low computational overhead in mind.
+
 # ZMQonPXI
 
 Jaehyung Choi<br>
