@@ -1,5 +1,6 @@
-#include "zmqwrap.h"
+#include "rt-bridge.h"
 #include <stdio.h>
+#include <czmq.h>
 
 // Continuation flag
 int rtbLoopFlag = 1;
@@ -131,7 +132,7 @@ void rtb_cleanup(void* pub, void* sub, void* context)
 */
 void startmsg(void* pub, int* rtbLoopFlag)
 {
-    signal(SIGINT, signalHandler);
+    signal(SIGINT, rtbLoopFlag);
     unsigned long long i = 0;
     while (*rtbLoopFlag)
     {

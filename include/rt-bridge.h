@@ -1,4 +1,7 @@
 // Header file for wrapper library on PXI and Raspberry Pi
+#pragma once
+#ifndef RTBRIDGE_H
+#define RTBRIDGE_H
 
 #if defined(_WIN32) || defined(__CYGWIN__)
     #include <czmq.h>
@@ -66,4 +69,4 @@ extern "C" {
 #ifdef __cplusplus 
 }
 #endif 
-
+#endif
